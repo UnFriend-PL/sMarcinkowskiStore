@@ -5,16 +5,24 @@
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
   >
-    <!-- Pętla przez wszystkie warstwy paralaksy -->
-    <div
-      v-for="(layer, index) in parallaxLayers"
-      :key="index"
-      class="parallax-layer"
-      :style="getLayerStyle(layer, index)"
-    ></div>
-
     <!-- Panel oferty -->
-    <OfferPanel :isOpen="offerOpen" @update:isOpen="offerOpen = $event" />
+    <OfferPanel
+      :isOpen="offerOpen"
+      @update:isOpen="offerOpen = $event"
+      @hover="isOfferHovered = true"
+      @leave="isOfferHovered = false"
+    />
+
+    <!-- Główna zawartość opakowana w <main> -->
+    <main :class="{ pushed: isOfferHovered }">
+      <!-- Pętla przez wszystkie warstwy paralaksy -->
+      <div
+        v-for="(layer, index) in parallaxLayers"
+        :key="index"
+        class="parallax-layer"
+        :style="getLayerStyle(layer, index)"
+      ></div>
+    </main>
 
     <!-- Kontrolki mobilne -->
     <div class="mobile-controls" v-if="isMobile">
@@ -32,12 +40,14 @@
 import { ref, onMounted } from 'vue'
 import OfferPanel from './OfferPanel.vue'
 
+// Import przykładowych zasobów graficznych
 import clouds1 from '@/assets/clouds1.png'
 import clouds2 from '@/assets/clouds2.png'
 import ground from '@/assets/ground.png'
 import sky from '@/assets/sky.png'
 
 const offerOpen = ref(false)
+const isOfferHovered = ref(false)
 const parallaxOffsetX = ref(0)
 const parallaxOffsetY = ref(0)
 const isMobile = ref(false)
@@ -48,7 +58,6 @@ const parallaxLayers = ref([
   { image: ground, speed: 0.3 },
   { image: clouds1, speed: 0.7 },
   { image: clouds2, speed: 0.5 },
-
 ])
 
 onMounted(() => {
@@ -94,7 +103,6 @@ function toggleOffer(direction) {
   }
 }
 
-// Funkcja generująca style dla danej warstwy. Używamy speed do przeliczenia przesunięcia.
 function getLayerStyle(layer, index) {
   return {
     transform: `translate(${parallaxOffsetX.value * layer.speed}px, ${parallaxOffsetY.value * layer.speed}px)`,
@@ -119,8 +127,22 @@ function getLayerStyle(layer, index) {
   height: 100vh;
 }
 
+main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease;
+  z-index: 0;
+}
+
+main.pushed {
+  transform: translateX(300px);
+}
+
 .parallax-layer {
-  /* Styles sets in function getLayerStyle */
+  /* styles dynamics from getLayerStyle function */
 }
 
 .mobile-controls {

@@ -2,14 +2,12 @@
   <div
     class="offer-panel"
     :class="{ open: isOpen }"
-    @mouseenter="openPanel"
-    @mouseleave="closePanel"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
   >
     <div class="content">
-      <!-- Tutaj wstaw treść swojej oferty -->
       <h1>Moja Oferta</h1>
     </div>
-    <!-- Półokrągły przycisk wystający na zewnątrz panelu -->
     <button class="toggle-button" @click="toggle">
       <span class="arrow">←</span>
     </button>
@@ -17,25 +15,27 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineEmits, defineProps } from 'vue'
 
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
-const emit = defineEmits(['update:isOpen'])
+const emit = defineEmits(['update:isOpen', 'hover', 'leave'])
 
 function toggle() {
   emit('update:isOpen', !props.isOpen)
 }
 
-function openPanel() {
+function handleMouseEnter() {
+  emit('hover')
   emit('update:isOpen', true)
 }
 
-function closePanel() {
+function handleMouseLeave() {
+  emit('leave')
   emit('update:isOpen', false)
 }
 </script>
@@ -45,10 +45,10 @@ function closePanel() {
   position: absolute;
   top: 0;
   left: 0;
-  width: 90%;
+  width: 85%;
   height: 100%;
   background-color: rgba(255, 255, 255, 0.95);
-  transform: translateX(-85%);
+  transform: translateX(-90%);
   transition: transform 0.5s ease;
   z-index: 10;
 }
@@ -61,11 +61,10 @@ function closePanel() {
   padding: 20px;
 }
 
-/* Półokrągły przycisk wystający na zewnątrz panelu */
 .toggle-button {
   position: absolute;
   top: 50%;
-  right: -25px; /* przycisk wystaje poza panel */
+  right: -25px;
   transform: translateY(-50%);
   width: 50px;
   height: 50px;
@@ -81,7 +80,6 @@ function closePanel() {
 
 .arrow {
   font-size: 1.5rem;
-  /* Obrót można modyfikować w zależności od efektu – obecnie strzałka wskazuje w lewo */
   transform: rotate(180deg);
 }
 </style>
