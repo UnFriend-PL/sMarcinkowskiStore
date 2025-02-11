@@ -1,7 +1,8 @@
 <template>
   <div
     class="parallax-panel"
-    :class="[positionClass, { open: isOpen }]"
+    :class="positionClass"
+    :style="panelStyle"
     @mousemove="handleMouseMove"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
@@ -23,7 +24,6 @@
       </div>
     </div>
 
-    <!-- Przycisk toggle -->
     <button class="toggle-button" @click="toggle">
       <span class="arrow" :style="{ transform: arrowRotation }">←</span>
     </button>
@@ -38,6 +38,10 @@ const props = defineProps({
   isOpen: {
     type: Boolean,
     default: false,
+  },
+  activePanel: {
+    type: String,
+    default: null,
   },
   left: { type: Boolean, default: false },
   right: { type: Boolean, default: false },
@@ -123,6 +127,35 @@ const arrowRotation = computed(() => {
   }
 })
 
+const panelTransform = computed(() => {
+  const direction = positionClass.value
+  if (props.activePanel && props.activePanel !== direction) {
+    switch (direction) {
+      case 'left': return 'translateX(-100%)'
+      case 'right': return 'translateX(100%)'
+      case 'top': return 'translateY(-100%)'
+      case 'bottom': return 'translateY(100%)'
+    }
+  } else {
+    if (props.isOpen) {
+      if (direction === 'left' || direction === 'right') return 'translateX(0)'
+      else return 'translateY(0)'
+    } else {
+      switch (direction) {
+        case 'left': return 'translateX(-90%)'
+        case 'right': return 'translateX(90%)'
+        case 'top': return 'translateY(-90%)'
+        case 'bottom': return 'translateY(90%)'
+      }
+    }
+  }
+})
+
+const panelStyle = computed(() => ({
+  transform: panelTransform.value,
+  transition: 'transform 0.5s ease'
+}))
+
 function getLayerStyle(layer) {
   const translateX = layer.parallaxX ? parallaxOffsetX.value * layer.speed : 0
   const translateY = layer.parallaxY ? parallaxOffsetY.value * layer.speed : 0
@@ -145,14 +178,7 @@ function getLayerStyle(layer) {
 .parallax-panel {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.95);
-  transition: transform 0.5s ease;
   z-index: 10;
-}
-
-.panel-content-wrapper {
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
 }
 
 .parallax-panel.left {
@@ -160,10 +186,6 @@ function getLayerStyle(layer) {
   left: 0;
   width: 85%;
   height: 100%;
-  transform: translateX(-90%);
-}
-.parallax-panel.left.open {
-  transform: translateX(0);
 }
 
 .parallax-panel.right {
@@ -171,10 +193,6 @@ function getLayerStyle(layer) {
   right: 0;
   width: 85%;
   height: 100%;
-  transform: translateX(90%);
-}
-.parallax-panel.right.open {
-  transform: translateX(0);
 }
 
 .parallax-panel.top {
@@ -182,10 +200,6 @@ function getLayerStyle(layer) {
   left: 0;
   width: 100%;
   height: 85%;
-  transform: translateY(-90%);
-}
-.parallax-panel.top.open {
-  transform: translateY(0);
 }
 
 .parallax-panel.bottom {
@@ -193,10 +207,12 @@ function getLayerStyle(layer) {
   left: 0;
   width: 100%;
   height: 85%;
-  transform: translateY(90%);
 }
-.parallax-panel.bottom.open {
-  transform: translateY(0);
+
+.panel-content-wrapper {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 .panel-content {

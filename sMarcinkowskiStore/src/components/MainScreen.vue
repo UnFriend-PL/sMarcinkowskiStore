@@ -3,24 +3,30 @@
     <ParallaxPanel
       :isOpen="openPanel === 'left'"
       left
+      :activePanel="openPanel"
       :layers="parallaxLayers"
       @update:isOpen="val => openPanel = val ? 'left' : (openPanel === 'left' ? null : openPanel)"
       @hover="panelHovered = true"
       @leave="panelHovered = false"
     >
+      <h2>Lewy panel</h2>
     </ParallaxPanel>
 
     <ParallaxPanel
-      :isOpen="openPanel === 'bottom'"
-      bottom
+      :isOpen="openPanel === 'right'"
+      right
+      :activePanel="openPanel"
       :layers="parallaxLayers"
-      @update:isOpen="val => openPanel = val ? 'bottom' : (openPanel === 'bottom' ? null : openPanel)"
+      @update:isOpen="val => openPanel = val ? 'right' : (openPanel === 'right' ? null : openPanel)"
       @hover="panelHovered = true"
       @leave="panelHovered = false"
     >
+      <h2>Prawy panel</h2>
     </ParallaxPanel>
 
-    <main :class="{ pushed: panelHovered }">
+    <main :style="mainTransformStyle">
+      <h1>Główna zawartość</h1>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
     </main>
 
     <div class="mobile-controls" v-if="isMobile">
@@ -35,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ParallaxPanel from './ParallaxPanel.vue'
 
 import clouds1 from '@/assets/clouds1.png'
@@ -43,7 +49,7 @@ import clouds2 from '@/assets/clouds2.png'
 import ground from '@/assets/ground.png'
 import sky from '@/assets/sky.png'
 
-const openPanel = ref(null) // null, 'left' lub 'right'
+const openPanel = ref(null) // null, 'left', 'right', 'top' lub 'bottom'
 const panelHovered = ref(false)
 const isMobile = ref(false)
 
@@ -62,18 +68,33 @@ onMounted(() => {
 })
 
 function togglePanel(direction) {
-  if (direction === 'left') {
-    openPanel.value = openPanel.value === 'left' ? null : 'left'
-  } else if (direction === 'right') {
-    openPanel.value = openPanel.value === 'right' ? null : 'right'
-  }
-  else if (direction === 'top') {
-    openPanel.value = openPanel.value === 'top' ? null : 'top'
-  }
-  else if (direction === 'bottom') {
-    openPanel.value = openPanel.value === 'bottom' ? null : 'bottom'
-  }
+  openPanel.value = openPanel.value === direction ? null : direction
 }
+
+const mainTransformStyle = computed(() => {
+  if (!openPanel.value) return {}
+  let transformValue = ''
+  switch (openPanel.value) {
+    case 'left':
+      transformValue = 'translateX(100vw)'
+      break
+    case 'right':
+      transformValue = 'translateX(-100vw)'
+      break
+    case 'top':
+      transformValue = 'translateY(100vh)'
+      break
+    case 'bottom':
+      transformValue = 'translateY(-100vh)'
+      break
+    default:
+      transformValue = ''
+  }
+  return {
+    transform: transformValue,
+    transition: 'transform 0.5s ease'
+  }
+})
 </script>
 
 <style scoped>
@@ -90,15 +111,10 @@ main {
   left: 0;
   width: 100%;
   height: 100%;
-  transition: transform 0.5s ease;
   z-index: 0;
+  transition: transform 0.5s ease
 }
 
-main.pushed {
-  transform: translateX(300px);
-}
-
-/* Kontrolki mobilne */
 .mobile-controls {
   position: absolute;
   bottom: 20px;
