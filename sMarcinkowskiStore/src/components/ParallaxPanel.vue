@@ -58,6 +58,7 @@ const emit = defineEmits(['update:isOpen', 'hover', 'leave'])
 const parallaxOffsetX = ref(0)
 const parallaxOffsetY = ref(0)
 const touchStartX = ref(0)
+const touchStartY = ref(0)
 
 function handleMouseMove(event) {
   const rect = event.currentTarget.getBoundingClientRect()
@@ -70,13 +71,20 @@ function handleMouseMove(event) {
 
 function handleTouchStart(event) {
   touchStartX.value = event.touches[0].clientX
+  touchStartX.value = event.touches[0].clientY
 }
 
 function handleTouchMove(event) {
-  const touchCurrentX = event.touches[0].clientX
+  const touchCurrentX = event.touches[0].clientX;
+  const touchCurrentY = event.touches[0].clientY;
   if (positionClass.value === 'left' && touchCurrentX - touchStartX.value > 50) {
     openPanel()
   } else if (positionClass.value === 'right' && touchStartX.value - touchCurrentX > 50) {
+    openPanel()
+  }
+  else if (positionClass.value === 'top' && touchCurrentY - touchStartY.value > 50) {
+    openPanel()
+  } else if (positionClass.value === 'bottom' && touchStartY.value - touchCurrentY > 50) {
     openPanel()
   }
 }

@@ -29,14 +29,6 @@
       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
     </main>
 
-    <div class="mobile-controls" v-if="isMobile">
-      <button @click="togglePanel('left')" class="mobile-button left">
-        <i class="arrow-left"></i>
-      </button>
-      <button @click="togglePanel('right')" class="mobile-button right">
-        <i class="arrow-right"></i>
-      </button>
-    </div>
   </div>
 </template>
 
@@ -67,9 +59,6 @@ onMounted(() => {
   })
 })
 
-function togglePanel(direction) {
-  openPanel.value = openPanel.value === direction ? null : direction
-}
 
 const mainTransformStyle = computed(() => {
   if (!openPanel.value) return {}
@@ -113,34 +102,5 @@ main {
   height: 100%;
   z-index: 0;
   transition: transform 0.5s ease
-}
-
-.mobile-controls {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 20px;
-  z-index: 20;
-}
-
-.mobile-button {
-  background: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-}
-
-.arrow-left::before {
-  content: '←';
-  font-size: 1.5rem;
-}
-
-.arrow-right::before {
-  content: '→';
-  font-size: 1.5rem;
 }
 </style>
