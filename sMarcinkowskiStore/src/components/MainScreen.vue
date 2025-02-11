@@ -1,35 +1,33 @@
 <template>
-  <div
-    class="container"
-    @mousemove="handleMouseMove"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
-  >
-    <!-- Panel oferty -->
-    <OfferPanel
-      :isOpen="offerOpen"
-      @update:isOpen="offerOpen = $event"
-      @hover="isOfferHovered = true"
-      @leave="isOfferHovered = false"
-    />
+  <div class="container">
+    <ParallaxPanel
+      :isOpen="openPanel === 'left'"
+      left
+      :layers="parallaxLayers"
+      @update:isOpen="val => openPanel = val ? 'left' : (openPanel === 'left' ? null : openPanel)"
+      @hover="panelHovered = true"
+      @leave="panelHovered = false"
+    >
+    </ParallaxPanel>
 
-    <!-- Główna zawartość opakowana w <main> -->
-    <main :class="{ pushed: isOfferHovered }">
-      <!-- Pętla przez wszystkie warstwy paralaksy -->
-      <div
-        v-for="(layer, index) in parallaxLayers"
-        :key="index"
-        class="parallax-layer"
-        :style="getLayerStyle(layer, index)"
-      ></div>
+    <ParallaxPanel
+      :isOpen="openPanel === 'bottom'"
+      bottom
+      :layers="parallaxLayers"
+      @update:isOpen="val => openPanel = val ? 'bottom' : (openPanel === 'bottom' ? null : openPanel)"
+      @hover="panelHovered = true"
+      @leave="panelHovered = false"
+    >
+    </ParallaxPanel>
+
+    <main :class="{ pushed: panelHovered }">
     </main>
 
-    <!-- Kontrolki mobilne -->
     <div class="mobile-controls" v-if="isMobile">
-      <button @click="toggleOffer('left')" class="mobile-button left">
+      <button @click="togglePanel('left')" class="mobile-button left">
         <i class="arrow-left"></i>
       </button>
-      <button @click="toggleOffer('right')" class="mobile-button right">
+      <button @click="togglePanel('right')" class="mobile-button right">
         <i class="arrow-right"></i>
       </button>
     </div>
@@ -38,26 +36,22 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import OfferPanel from './OfferPanel.vue'
+import ParallaxPanel from './ParallaxPanel.vue'
 
-// Import przykładowych zasobów graficznych
 import clouds1 from '@/assets/clouds1.png'
 import clouds2 from '@/assets/clouds2.png'
 import ground from '@/assets/ground.png'
 import sky from '@/assets/sky.png'
 
-const offerOpen = ref(false)
-const isOfferHovered = ref(false)
-const parallaxOffsetX = ref(0)
-const parallaxOffsetY = ref(0)
+const openPanel = ref(null) // null, 'left' lub 'right'
+const panelHovered = ref(false)
 const isMobile = ref(false)
-const touchStartX = ref(0)
 
 const parallaxLayers = ref([
-  { image: sky, speed: 0 },
-  { image: ground, speed: 0.3 },
-  { image: clouds1, speed: 0.7 },
-  { image: clouds2, speed: 0.5 },
+  { image: sky, speed: 0, parallaxX: true, parallaxY: true, layer: 0 },
+  { image: ground, speed: 0.3, parallaxX: true, parallaxY: true, layer: 1 },
+  { image: clouds1, speed: 0.7, parallaxX: true, parallaxY: false, layer: 2 },
+  { image: clouds2, speed: 0.5, parallaxX: false, parallaxY: true, layer: 3 }
 ])
 
 onMounted(() => {
@@ -67,54 +61,17 @@ onMounted(() => {
   })
 })
 
-function handleMouseMove(event) {
-  const windowWidth = window.innerWidth
-  const relativeX = (event.clientX - windowWidth / 2) / (windowWidth / 2)
-  parallaxOffsetX.value = relativeX * 20
-
-  const windowHeight = window.innerHeight
-  const relativeY = (event.clientY - windowHeight / 2) / (windowHeight / 2)
-  parallaxOffsetY.value = relativeY * 20
-
-  const edgeThreshold = 50
-  if (event.clientX < edgeThreshold) {
-    offerOpen.value = true
-  } else if (event.clientX > windowWidth - edgeThreshold) {
-    offerOpen.value = false
-  }
-}
-
-function handleTouchStart(event) {
-  touchStartX.value = event.touches[0].clientX
-}
-
-function handleTouchMove(event) {
-  const touchCurrentX = event.touches[0].clientX
-  if (touchCurrentX - touchStartX.value > 50) {
-    offerOpen.value = true
-  }
-}
-
-function toggleOffer(direction) {
+function togglePanel(direction) {
   if (direction === 'left') {
-    offerOpen.value = true
+    openPanel.value = openPanel.value === 'left' ? null : 'left'
   } else if (direction === 'right') {
-    offerOpen.value = false
+    openPanel.value = openPanel.value === 'right' ? null : 'right'
   }
-}
-
-function getLayerStyle(layer, index) {
-  return {
-    transform: `translate(${parallaxOffsetX.value * layer.speed}px, ${parallaxOffsetY.value * layer.speed}px)`,
-    background: `url('${layer.image}') no-repeat center center`,
-    backgroundSize: 'cover',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    zIndex: index,
-    transition: 'transform 0.1s'
+  else if (direction === 'top') {
+    openPanel.value = openPanel.value === 'top' ? null : 'top'
+  }
+  else if (direction === 'bottom') {
+    openPanel.value = openPanel.value === 'bottom' ? null : 'bottom'
   }
 }
 </script>
@@ -141,10 +98,7 @@ main.pushed {
   transform: translateX(300px);
 }
 
-.parallax-layer {
-  /* styles dynamics from getLayerStyle function */
-}
-
+/* Kontrolki mobilne */
 .mobile-controls {
   position: absolute;
   bottom: 20px;
