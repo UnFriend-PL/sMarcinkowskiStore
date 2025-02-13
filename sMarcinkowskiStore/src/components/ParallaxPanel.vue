@@ -169,13 +169,13 @@ function getLayerStyle(layer) {
   const translateY = layer.parallaxY ? parallaxOffsetY.value * layer.speed : 0
   return {
     transform: `translate(${translateX}px, ${translateY}px)`,
-    background: `url('${layer.image}') no-repeat center center`,
-    backgroundSize: 'cover',
+    background: `url('${layer.image}') no-repeat bottom center`,
+    backgroundSize: 'contain',
     position: 'absolute',
     top: 0,
     left: 0,
-    width: '100%',
-    height: '100%',
+    width: '102%',
+    height: '102%',
     zIndex: layer.layer ?? 0,
     transition: 'transform 0.1s'
   }
@@ -187,7 +187,8 @@ function getLayerStyle(layer) {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.95);
   z-index: 10;
-}
+  overflow-x: hidden;
+  scrollbar-width: none; }
 
 .parallax-panel.left {
   top: 0;
